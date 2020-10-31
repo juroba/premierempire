@@ -1,0 +1,8 @@
+/**
+ * Remove default margin.
+ */
+body {
+    background-image: url('../media/fond.png');
+    margin: 0;
+    padding: 0;
+}
