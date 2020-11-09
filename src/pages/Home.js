@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import { Button, Grid, TextField } from '@material-ui/core'
-import homeImg from './static/media/default.png'
+import homeImg from '../static/media/default.png'
 
 class Home extends Component {
     render() {
@@ -15,6 +15,10 @@ class Home extends Component {
                 <Grid
                     item
                     xs={12}
+                    container
+                    direction="row"
+                    justify="center"
+                    alignItems="center"
                     style={{ backgroundImage: "url('../media/default.png')", marginBottom: '20px' }}
                 >
                     <img src={homeImg} />
