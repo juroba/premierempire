@@ -7,14 +7,11 @@ body {
     padding: 5px;
 }
 
-table {
+table.movement {
     border: 1px solid black;
-}
-table td {
-    border: 1px solid black; /* Style just to show the table cell boundaries */
-}
-
-table.no-spacing {
     border-spacing: 0; /* Removes the cell spacing via CSS */
     border-collapse: collapse; /* Optional - if you don't want to have double border where cells touch */
+}
+table.movement td {
+    border: 1px solid black; /* Style just to show the table cell boundaries */
 }
