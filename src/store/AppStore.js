@@ -5,6 +5,7 @@ import { createStore, combineReducers, applyMiddleware } from 'redux'
 import { routerMiddleware } from 'react-router-redux'
 import { connectRouter } from 'connected-react-router'
 import { createHashHistory } from 'history'
+import { UnitReducer, store as UnitReducerStore } from '../units/UnitReducer'
 
 export const history = createHashHistory()
 
@@ -16,9 +17,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 const enhancer = applyMiddleware(...middlewares)
 
-const initialStore = {}
+const initialStore = {
+    UnitReducer: UnitReducerStore,
+}
 
 const appReducers = combineReducers({
+    UnitReducer,
     router: connectRouter(history),
 })
 

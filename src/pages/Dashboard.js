@@ -1,7 +1,9 @@
 import { Component } from 'react'
-import { Grid, styled } from '@material-ui/core'
+import { Grid, Icon, LinearProgress, styled } from '@material-ui/core'
 import grass from '../static/media/grass.PNG'
-import offPrusse from '../static/media/offPrusse.png'
+//import offPrusse from '../static/media/offPrusse.png'
+import { connect } from 'react-redux'
+import UnitAction from '../units/UnitAction'
 
 const SubTitleCard = styled(({ ...other }) => <Grid {...other} />)({
     height: '20px',
@@ -15,25 +17,16 @@ class Dashboard extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            view: 4,
-            x: 5,
-            y: 5,
-            unit: {
-                id: 1,
-                name: 'Cendrov',
-                type: 1,
-                idUser: 1,
-                pa: 20,
-                view: 7,
-                eff: 50,
-                moral: 100,
-                xp: 0,
-                formation: 1,
-                x: 10,
-                y: 10,
-            },
+            dataLoaded: false,
+            unitId: 1,
+            unit: {},
             movement: false,
         }
+    }
+
+    componentDidMount() {
+        const { unitId } = this.state
+        this.getInfos(unitId)
     }
 
     getStyle = (iUnit, i) => {
@@ -48,27 +41,31 @@ class Dashboard extends Component {
     }
 
     getRow = (xStart, y, unit, size) => {
+        const { visibleUnits } = this.props
         const rows = []
         for (let i = xStart; i <= xStart + size; i++) {
-            if (i >= 0) {
-                if (y === unit.y && i === unit.x) {
+            if (i > 0) {
+                const visibleUnit = visibleUnits.find((u) => u.x === i && u.y === y)
+                if ((y === unit.y && i === unit.x) || visibleUnit) {
+                    const unitToShow = visibleUnit || unit
                     rows.push(
                         <td
                             style={{
-                                backgroundImage: `url(${grass})`,
+                                backgroundColor: visibleUnit ? 'red' : 'lightgreen',
                                 backgroundSize: 'cover',
                                 width: '45px',
                                 height: '45px',
                             }}
                         >
-                            <img
+                            {unitToShow.id}
+                            {/* <img
                                 src={offPrusse}
                                 style={{
                                     width: '40px',
                                     height: '40px',
                                 }}
                                 alt="unitImg"
-                            />
+                            /> */}
                         </td>,
                     )
                 } else {
@@ -96,12 +93,12 @@ class Dashboard extends Component {
         const firstRow = []
         firstRow.push(<td style={this.getStyle(unit.x, xStart + 1)} />)
         for (let i = xStart; i <= xStart + size; i++) {
-            if (i >= 0) firstRow.push(<td style={this.getStyle(unit.x, i)}>{i}</td>)
+            if (i > 0) firstRow.push(<td style={this.getStyle(unit.x, i)}>{i}</td>)
         }
         const table = []
         table.push(firstRow)
         for (let i = yStart; i <= yStart + size; i++) {
-            if (i >= 0) {
+            if (i > 0) {
                 table.push(
                     <tr>
                         <td style={this.getStyle(unit.y, i)}>{i}</td>
@@ -123,290 +120,305 @@ class Dashboard extends Component {
 
     moveUnit = () => {
         const { unit, movement } = this.state
-        let moveX = 0
-        let moveY = 0
-        switch (movement) {
-            case 1:
-                moveX = -1
-                moveY = -1
-                break
-            case 2:
-                moveX = 0
-                moveY = -1
-                break
-            case 3:
-                moveX = 1
-                moveY = -1
-                break
-            case 4:
-                moveX = -1
-                moveY = 0
-                break
-            case 5:
-                moveX = 1
-                moveY = 0
-                break
-            case 6:
-                moveX = -1
-                moveY = 1
-                break
-            case 7:
-                moveX = 0
-                moveY = 1
-                break
-            case 8:
-                moveX = 1
-                moveY = 1
-                break
-            default:
-                break
-        }
         if (movement) {
-            this.setState({
-                unit: {
-                    ...unit,
-                    x: unit.x + moveX,
-                    y: unit.y + moveY,
-                },
-                movement: false,
+            this.props.moveUnit(unit.id, movement).then(() => {
+                this.setState({ unit: this.props.unit, movement: false })
             })
         }
     }
 
-    render() {
-        const { unit, movement } = this.state
+    getInfos = (unitId) => {
+        this.setState({ dataLoaded: false })
+        this.props.getUnit(unitId).then(() => {
+            const { unit } = this.props
+            this.props.getVisibleUnits(unitId).then(() => {
+                this.setState({ unit, dataLoaded: true })
+            })
+        })
+    }
 
-        return (
-            <>
-                <SubTitleCard item />
-                <Grid
-                    container
-                    direction="row"
-                    justify="flex-start"
-                    alignItems="flex-start"
-                    style={{ width: '100vw' }}
-                    spacing={3}
-                >
+    changeUnit = (unitId) => {
+        this.setState({ unitId })
+        this.getInfos(unitId)
+    }
+
+    render() {
+        const { dataLoaded, unit, unitId, movement } = this.state
+
+        if (dataLoaded) {
+            return (
+                <>
+                    <SubTitleCard item />
                     <Grid
-                        item
-                        xs={3}
                         container
-                        direction="column"
-                        alignItems="center"
-                        justify="center"
+                        direction="row"
+                        justify="flex-start"
+                        alignItems="flex-start"
+                        style={{ width: '100vw' }}
+                        spacing={3}
                     >
-                        <SubTitleCard item noMargin>
-                            <span
-                                style={{
-                                    padding: '8px',
-                                }}
+                        <Grid
+                            item
+                            xs={3}
+                            container
+                            direction="column"
+                            alignItems="center"
+                            justify="center"
+                        >
+                            <Icon onClick={() => this.getInfos(unitId)}>refresh</Icon>
+                            <SubTitleCard item noMargin>
+                                <span
+                                    style={{
+                                        padding: '8px',
+                                    }}
+                                >
+                                    Infos du bataillon
+                                </span>
+                            </SubTitleCard>
+                            <Grid
+                                item
+                                container
+                                direction="row"
+                                style={{ padding: '10px' }}
+                                spacing={1}
                             >
-                                Infos du bataillon
-                            </span>
-                        </SubTitleCard>
+                                <Grid item xs={3}>
+                                    Officier
+                                </Grid>
+                                <Grid item xs={9}>
+                                    <select
+                                        value={unitId}
+                                        style={{ width: '100%' }}
+                                        onChange={(e) => this.changeUnit(e.target.value)}
+                                    >
+                                        <option value={1}>1</option>
+                                        <option value={2}>2</option>
+                                        <option value={3}>3</option>
+                                        <option value={4}>4</option>
+                                        <option value={5}>5</option>
+                                        <option value={6}>6</option>
+                                        <option value={7}>7</option>
+                                    </select>
+                                </Grid>
+                                <Grid item xs={3}>
+                                    Matricule
+                                </Grid>
+                                <Grid item xs={9}>
+                                    {unit.id}
+                                </Grid>
+                                <Grid item xs={3}>
+                                    Type
+                                </Grid>
+                                <Grid item xs={9}>
+                                    {unit.type}
+                                </Grid>
+                                <Grid item xs={3}>
+                                    XP
+                                </Grid>
+                                <Grid item xs={3}>
+                                    {unit.xp}
+                                </Grid>
+                                <Grid item xs={3}>
+                                    Effectif
+                                </Grid>
+                                <Grid item xs={3}>
+                                    {unit.pv}
+                                </Grid>
+                                <Grid item xs={3}>
+                                    PA
+                                </Grid>
+                                <Grid item xs={3}>
+                                    {unit.actionPoints}
+                                </Grid>
+                                <Grid item xs={3}>
+                                    Moral
+                                </Grid>
+                                <Grid item xs={3}>
+                                    {unit.moral}%
+                                </Grid>
+                            </Grid>
+                            <SubTitleCard item noMargin>
+                                <span
+                                    style={{
+                                        padding: '8px',
+                                    }}
+                                >
+                                    Déplacement
+                                </span>
+                            </SubTitleCard>
+                            <Grid item>
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <input
+                                                    type="radio"
+                                                    name="move"
+                                                    checked={movement === 1}
+                                                    onChange={(e) =>
+                                                        this.setMovement(e.target.value)
+                                                    }
+                                                    value={1}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="radio"
+                                                    name="move"
+                                                    checked={movement === 2}
+                                                    onChange={(e) =>
+                                                        this.setMovement(e.target.value)
+                                                    }
+                                                    value={2}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="radio"
+                                                    name="move"
+                                                    checked={movement === 3}
+                                                    onChange={(e) =>
+                                                        this.setMovement(e.target.value)
+                                                    }
+                                                    value={3}
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input
+                                                    type="radio"
+                                                    name="move"
+                                                    checked={movement === 4}
+                                                    onChange={(e) =>
+                                                        this.setMovement(e.target.value)
+                                                    }
+                                                    value={4}
+                                                />
+                                            </td>
+                                            <td />
+                                            <td>
+                                                <input
+                                                    type="radio"
+                                                    name="move"
+                                                    checked={movement === 5}
+                                                    onChange={(e) =>
+                                                        this.setMovement(e.target.value)
+                                                    }
+                                                    value={5}
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input
+                                                    type="radio"
+                                                    name="move"
+                                                    checked={movement === 6}
+                                                    onChange={(e) =>
+                                                        this.setMovement(e.target.value)
+                                                    }
+                                                    value={6}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="radio"
+                                                    name="move"
+                                                    checked={movement === 7}
+                                                    onChange={(e) =>
+                                                        this.setMovement(e.target.value)
+                                                    }
+                                                    value={7}
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="radio"
+                                                    name="move"
+                                                    checked={movement === 8}
+                                                    onChange={(e) =>
+                                                        this.setMovement(e.target.value)
+                                                    }
+                                                    value={8}
+                                                />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </Grid>
+                            <Grid item>
+                                <button type="button" onClick={this.moveUnit}>
+                                    Déplacer le bataillon
+                                </button>
+                            </Grid>
+                            {/* <input
+                                title="Vue"
+                                type="number"
+                                value={unit.view}
+                                onChange={(e) =>
+                                    this.setState({
+                                        unit: { ...unit, view: parseInt(e.target.value) },
+                                    })
+                                }
+                            /> */}
+                            <SubTitleCard item noMargin>
+                                <span
+                                    style={{
+                                        padding: '8px',
+                                    }}
+                                >
+                                    Courrier du régiment
+                                </span>
+                            </SubTitleCard>
+                            <SubTitleCard item noMargin>
+                                <span
+                                    style={{
+                                        padding: '8px',
+                                    }}
+                                >
+                                    Mes derniers évenements
+                                </span>
+                            </SubTitleCard>
+                        </Grid>
                         <Grid
                             item
                             container
-                            direction="row"
-                            style={{ padding: '10px' }}
-                            spacing={1}
+                            direction="column"
+                            justify="center"
+                            alignItems="center"
+                            style={{ width: 'max-content' }}
                         >
-                            <Grid item xs={3}>
-                                Officier
-                            </Grid>
-                            <Grid item xs={9}>
-                                <select style={{ width: '100%' }}>
-                                    <option>Cendrov - EM</option>
-                                    <option>Centir - Gre.</option>
-                                    <option>Centor - Fus.</option>
-                                </select>
-                            </Grid>
-                            <Grid item xs={3}>
-                                Matricule
-                            </Grid>
-                            <Grid item xs={9}>
-                                {unit.id}
-                            </Grid>
-                            <Grid item xs={3}>
-                                Type
-                            </Grid>
-                            <Grid item xs={9}>
-                                {unit.type}
-                            </Grid>
-                            <Grid item xs={3}>
-                                XP
-                            </Grid>
-                            <Grid item xs={3}>
-                                {unit.xp}
-                            </Grid>
-                            <Grid item xs={3}>
-                                Effectif
-                            </Grid>
-                            <Grid item xs={3}>
-                                {unit.eff}
-                            </Grid>
-                            <Grid item xs={3}>
-                                PA
-                            </Grid>
-                            <Grid item xs={3}>
-                                {unit.pa}
-                            </Grid>
-                            <Grid item xs={3}>
-                                Moral
-                            </Grid>
-                            <Grid item xs={3}>
-                                {unit.moral}%
-                            </Grid>
+                            <SubTitleCard>
+                                <span
+                                    style={{
+                                        padding: '8px',
+                                    }}
+                                >
+                                    Front
+                                </span>
+                            </SubTitleCard>
+                            <Grid item>{this.getView()}</Grid>
                         </Grid>
-                        <SubTitleCard item noMargin>
-                            <span
-                                style={{
-                                    padding: '8px',
-                                }}
-                            >
-                                Déplacement
-                            </span>
-                        </SubTitleCard>
-                        <Grid item>
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <input
-                                                type="radio"
-                                                name="move"
-                                                checked={movement === 1}
-                                                onChange={(e) => this.setMovement(e.target.value)}
-                                                value={1}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="radio"
-                                                name="move"
-                                                checked={movement === 2}
-                                                onChange={(e) => this.setMovement(e.target.value)}
-                                                value={2}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="radio"
-                                                name="move"
-                                                checked={movement === 3}
-                                                onChange={(e) => this.setMovement(e.target.value)}
-                                                value={3}
-                                            />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <input
-                                                type="radio"
-                                                name="move"
-                                                checked={movement === 4}
-                                                onChange={(e) => this.setMovement(e.target.value)}
-                                                value={4}
-                                            />
-                                        </td>
-                                        <td />
-                                        <td>
-                                            <input
-                                                type="radio"
-                                                name="move"
-                                                checked={movement === 5}
-                                                onChange={(e) => this.setMovement(e.target.value)}
-                                                value={5}
-                                            />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <input
-                                                type="radio"
-                                                name="move"
-                                                checked={movement === 6}
-                                                onChange={(e) => this.setMovement(e.target.value)}
-                                                value={6}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="radio"
-                                                name="move"
-                                                checked={movement === 7}
-                                                onChange={(e) => this.setMovement(e.target.value)}
-                                                value={7}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="radio"
-                                                name="move"
-                                                checked={movement === 8}
-                                                onChange={(e) => this.setMovement(e.target.value)}
-                                                value={8}
-                                            />
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </Grid>
-                        <Grid item>
-                            <button type="button" onClick={this.moveUnit}>
-                                Déplacer le bataillon
-                            </button>
-                        </Grid>
-                        <input
-                            title="Vue"
-                            type="number"
-                            value={unit.view}
-                            onChange={(e) =>
-                                this.setState({ unit: { ...unit, view: parseInt(e.target.value) } })
-                            }
-                        />
-                        <SubTitleCard item noMargin>
-                            <span
-                                style={{
-                                    padding: '8px',
-                                }}
-                            >
-                                Courrier du régiment
-                            </span>
-                        </SubTitleCard>
-                        <SubTitleCard item noMargin>
-                            <span
-                                style={{
-                                    padding: '8px',
-                                }}
-                            >
-                                Mes derniers évenements
-                            </span>
-                        </SubTitleCard>
                     </Grid>
-                    <Grid
-                        item
-                        container
-                        direction="column"
-                        justify="center"
-                        alignItems="center"
-                        style={{ width: 'max-content' }}
-                    >
-                        <SubTitleCard>
-                            <span
-                                style={{
-                                    padding: '8px',
-                                }}
-                            >
-                                Front
-                            </span>
-                        </SubTitleCard>
-                        <Grid item>{this.getView()}</Grid>
-                    </Grid>
-                </Grid>
-            </>
-        )
+                </>
+            )
+        }
+        return <LinearProgress />
     }
 }
 
-export default Dashboard
+const mapStateToProps = (store) => {
+    return {
+        unit: store.UnitReducer.unit,
+        visibleUnits: store.UnitReducer.visibleUnits,
+    }
+}
+
+const mapDispatchToProps = {
+    getUnit: UnitAction.getUnit,
+    getVisibleUnits: UnitAction.getVisibleUnits,
+    moveUnit: UnitAction.moveUnit,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard)
