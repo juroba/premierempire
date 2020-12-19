@@ -1,8 +1,32 @@
 import { Component } from 'react'
 import { Button, Grid, TextField } from '@material-ui/core'
 import homeImg from '../static/media/default.png'
+import { connect } from 'react-redux'
+import { push } from 'react-router-redux'
+import HomeAction from '../actions/home/HomeAction'
 
 class Home extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            login: null,
+            pwd: null,
+        }
+    }
+
+    onChange = (key, value) => {
+        this.setState({ [key]: value })
+    }
+
+    onSubmit = () => {
+        const { login, pwd } = this.state
+        if (login && pwd) {
+            this.props.login(login, pwd).then(() => {
+                this.props.push('/dashboard')
+            })
+        }
+    }
+
     render() {
         return (
             <Grid
@@ -24,17 +48,33 @@ class Home extends Component {
                     <img src={homeImg} />
                 </Grid>
                 <Grid item container direction="row" justify="center" alignItems="center" xs={4}>
-                    <TextField label="Identifiant" variant="outlined" />
+                    <TextField
+                        label="Identifiant"
+                        variant="outlined"
+                        onChange={(e) => this.onChange('login', e.target.value)}
+                    />
                 </Grid>
                 <Grid item container direction="row" justify="center" alignItems="center" xs={4}>
-                    <TextField label="Mot de passe" variant="outlined" type="password" />
+                    <TextField
+                        label="Mot de passe"
+                        variant="outlined"
+                        type="password"
+                        onChange={(e) => this.onChange('pwd', e.target.value)}
+                    />
                 </Grid>
                 <Grid item container direction="row" justify="center" alignItems="center" xs={4}>
-                    <Button variant="contained">Se connecter</Button>
+                    <Button variant="contained" onClick={this.onSubmit}>
+                        Se connecter
+                    </Button>
                 </Grid>
             </Grid>
         )
     }
 }
 
-export default Home
+const mapDispatchToProps = {
+    login: HomeAction.login,
+    push,
+}
+
+export default connect(null, mapDispatchToProps)(Home)

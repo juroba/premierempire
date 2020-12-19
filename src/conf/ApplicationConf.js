@@ -2,19 +2,18 @@
 const path = 'http://localhost:8000/'
 
 export default {
+    login: () => `${path}login`,
+    logout: () => `${path}logout`,
+    user: {
+        getUser: (login) => `${path}user/${login}`,
+    },
     unit: {
-        getUnit(unitId) {
-            return path + `units/${unitId}`
-        },
+        getUnit: (unitId) => `${path}units/${unitId}`,
     },
     view: {
-        visibleUnits(unitId) {
-            return path + `units/visible/${unitId}`
-        },
+        visibleUnits: (unitId) => `${path}units/visible/${unitId}`,
     },
     movement: {
-        move(unitId, direction) {
-            return path + `move/${unitId}/${direction}`
-        },
+        move: (unitId, direction) => `${path}move/${unitId}/${direction}`,
     },
 }

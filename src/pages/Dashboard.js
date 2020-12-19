@@ -3,7 +3,9 @@ import { Grid, Icon, LinearProgress, styled } from '@material-ui/core'
 import grass from '../static/media/grass.PNG'
 //import offPrusse from '../static/media/offPrusse.png'
 import { connect } from 'react-redux'
-import UnitAction from '../units/UnitAction'
+import UnitAction from '../actions/units/UnitAction'
+import HomeAction from '../actions/home/HomeAction'
+import { PE_LOGIN } from '../actions/home/HomeConstants'
 
 const SubTitleCard = styled(({ ...other }) => <Grid {...other} />)({
     height: '20px',
@@ -18,7 +20,7 @@ class Dashboard extends Component {
         super(props)
         this.state = {
             dataLoaded: false,
-            unitId: 1,
+            unitId: null,
             unit: {},
             movement: false,
         }
@@ -27,6 +29,13 @@ class Dashboard extends Component {
     componentDidMount() {
         const { unitId } = this.state
         this.getInfos(unitId)
+        const login = localStorage.getItem(PE_LOGIN)
+        if (login) {
+            this.props.getUser(login).then(() => {
+                const { user } = this.props
+                this.getInfos(user.id)
+            })
+        }
     }
 
     getStyle = (iUnit, i) => {
@@ -51,7 +60,7 @@ class Dashboard extends Component {
                     rows.push(
                         <td
                             style={{
-                                backgroundColor: visibleUnit ? 'red' : 'lightgreen',
+                                backgroundColor: unitToShow.nation === 1 ? 'blue' : 'orange',
                                 backgroundSize: 'cover',
                                 width: '45px',
                                 height: '45px',
@@ -96,7 +105,7 @@ class Dashboard extends Component {
             if (i > 0) firstRow.push(<td style={this.getStyle(unit.x, i)}>{i}</td>)
         }
         const table = []
-        table.push(firstRow)
+        table.push(<tr>{firstRow}</tr>)
         for (let i = yStart; i <= yStart + size; i++) {
             if (i > 0) {
                 table.push(
@@ -128,7 +137,7 @@ class Dashboard extends Component {
     }
 
     getInfos = (unitId) => {
-        this.setState({ dataLoaded: false })
+        this.setState({ dataLoaded: false, unitId })
         this.props.getUnit(unitId).then(() => {
             const { unit } = this.props
             this.props.getVisibleUnits(unitId).then(() => {
@@ -144,6 +153,7 @@ class Dashboard extends Component {
 
     render() {
         const { dataLoaded, unit, unitId, movement } = this.state
+        const { user } = this.props
 
         if (dataLoaded) {
             return (
@@ -165,7 +175,16 @@ class Dashboard extends Component {
                             alignItems="center"
                             justify="center"
                         >
-                            <Icon onClick={() => this.getInfos(unitId)}>refresh</Icon>
+                            <Grid
+                                item
+                                container
+                                direction="row"
+                                style={{ padding: '10px' }}
+                                spacing={1}
+                            >
+                                <Icon onClick={this.props.logout}>power_settings_new</Icon>
+                                <Icon onClick={() => this.getInfos(unitId)}>refresh</Icon>
+                            </Grid>
                             <SubTitleCard item noMargin>
                                 <span
                                     style={{
@@ -191,13 +210,13 @@ class Dashboard extends Component {
                                         style={{ width: '100%' }}
                                         onChange={(e) => this.changeUnit(e.target.value)}
                                     >
-                                        <option value={1}>1</option>
-                                        <option value={2}>2</option>
-                                        <option value={3}>3</option>
-                                        <option value={4}>4</option>
-                                        <option value={5}>5</option>
-                                        <option value={6}>6</option>
-                                        <option value={7}>7</option>
+                                        {user.units.map((u) => {
+                                            return (
+                                                <option
+                                                    value={u.id}
+                                                >{`${u.name} (${u.id})`}</option>
+                                            )
+                                        })}
                                     </select>
                                 </Grid>
                                 <Grid item xs={3}>
@@ -410,12 +429,15 @@ class Dashboard extends Component {
 
 const mapStateToProps = (store) => {
     return {
+        user: store.HomeReducer.user,
         unit: store.UnitReducer.unit,
         visibleUnits: store.UnitReducer.visibleUnits,
     }
 }
 
 const mapDispatchToProps = {
+    getUser: HomeAction.getUser,
+    logout: HomeAction.logout,
     getUnit: UnitAction.getUnit,
     getVisibleUnits: UnitAction.getVisibleUnits,
     moveUnit: UnitAction.moveUnit,

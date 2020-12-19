@@ -12,5 +12,6 @@ export default class DtoUnit {
         this.formation = object.formation
         this.x = object.x
         this.y = object.y
+        this.nation = object.nation
     }
 }

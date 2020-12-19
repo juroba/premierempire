@@ -1,3 +1,9 @@
+import { PE_TOKEN } from '../actions/home/HomeConstants'
+
+const removeToken = () => {
+    localStorage.removeItem(PE_TOKEN)
+}
+
 const getJson = function (response) {
     if (response) {
         return response.json()
@@ -23,4 +29,16 @@ const checkAuth = (response) => {
     }
 }
 
-export { checkAuth, getJson }
+const getAuthorization = () => ({
+    Authorization: 'Bearer ' + localStorage.getItem(PE_TOKEN),
+})
+
+const getPayload = () => {
+    const token = localStorage.getItem(PE_TOKEN)
+    if (token && token !== 'undefined') {
+        return token
+    }
+    return ''
+}
+
+export { removeToken, checkAuth, getJson, getAuthorization, getPayload }

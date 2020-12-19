@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch'
-import ApplicationConf from '../conf/ApplicationConf'
-import { getJson } from '../utils/ActionUtils'
+import ApplicationConf from '../../conf/ApplicationConf'
+import { getJson } from '../../utils/ActionUtils'
 import { RECEIVE_UNIT, RECEIVE_VISIBLE_UNITS } from './UnitConstants'
 
 const UnitAction = {

@@ -1,5 +1,6 @@
 import DtoUnit from './DtoUnit'
 import { RECEIVE_UNIT, RECEIVE_VISIBLE_UNITS } from './UnitConstants'
+import { FULL_RESET } from '../home/HomeConstants'
 
 export const store = {
     unit: {},
@@ -17,6 +18,10 @@ export function UnitReducer(state = {}, action) {
             return {
                 ...state,
                 visibleUnits: action.visibleUnits.map((u) => new DtoUnit(u)),
+            }
+        case FULL_RESET:
+            return {
+                ...store,
             }
         default:
             return state
