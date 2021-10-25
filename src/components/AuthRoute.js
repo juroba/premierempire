@@ -6,16 +6,16 @@ import HomeAction from '../actions/home/HomeAction'
 import { getPayload } from '../utils/ActionUtils'
 
 const checkAuth = (logout) => {
-    const payload = getPayload()
-    if (!payload) {
-        logout()
-        return false
-    }
+    // const payload = getPayload()
+    // if (!payload) {
+    //     logout()
+    //     return false
+    // }
     return true
 }
 
 const AuthRoute = (props) => {
-    return checkAuth(props.logout) ? <props.component {...props} /> : <Redirect to="/login" />
+    return checkAuth(props.logout) ? <props.component {...props} /> : <Redirect to="/test" />
 }
 
 const mapDispatchToProps = {

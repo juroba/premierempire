@@ -27,6 +27,12 @@ class Home extends Component {
         }
     }
 
+    keyPress = (e) => {
+        if (e.key === 'Enter') {
+            this.onSubmit()
+        }
+    }
+
     render() {
         return (
             <Grid
@@ -45,13 +51,14 @@ class Home extends Component {
                     alignItems="center"
                     style={{ backgroundImage: "url('../media/default.png')", marginBottom: '20px' }}
                 >
-                    <img src={homeImg} />
+                    <img src={homeImg} alt="home" />
                 </Grid>
                 <Grid item container direction="row" justify="center" alignItems="center" xs={4}>
                     <TextField
                         label="Identifiant"
                         variant="outlined"
                         onChange={(e) => this.onChange('login', e.target.value)}
+                        onKeyPress={this.keyPress}
                     />
                 </Grid>
                 <Grid item container direction="row" justify="center" alignItems="center" xs={4}>
@@ -60,6 +67,7 @@ class Home extends Component {
                         variant="outlined"
                         type="password"
                         onChange={(e) => this.onChange('pwd', e.target.value)}
+                        onKeyPress={this.keyPress}
                     />
                 </Grid>
                 <Grid item container direction="row" justify="center" alignItems="center" xs={4}>

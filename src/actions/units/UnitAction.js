@@ -44,7 +44,24 @@ const UnitAction = {
 
     moveUnit(unitId, direction) {
         return (dispatch) => {
-            return fetch(ApplicationConf.movement.move(unitId, direction), {
+            return fetch(ApplicationConf.actions.move(unitId, direction), {
+                method: 'PUT',
+            })
+                .then(getJson)
+                .then((json) => {
+                    console.log(json)
+                    dispatch(UnitAction.receiveUnit(json.unit))
+                    dispatch(UnitAction.receiveVisibleUnits(json.units))
+                })
+                .catch((err) => {
+                    console.error('Error : ' + err)
+                })
+        }
+    },
+
+    fire(unitId, targetId) {
+        return (dispatch) => {
+            return fetch(ApplicationConf.actions.fire(unitId, targetId), {
                 method: 'PUT',
             })
                 .then(getJson)

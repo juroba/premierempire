@@ -1,10 +1,24 @@
 /**
  * Remove default margin.
  */
+
+.bold {
+    font-weight: bold;
+}
+
 body {
     background-image: url('../media/fond.png');
     margin: 0;
     padding: 5px;
+    font-family: arial;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+td {
+    background-repeat: no-repeat !important;
 }
 
 table.movement {
@@ -12,6 +26,28 @@ table.movement {
     border-spacing: 0; /* Removes the cell spacing via CSS */
     border-collapse: collapse; /* Optional - if you don't want to have double border where cells touch */
 }
+
 table.movement td {
     border: 1px solid black; /* Style just to show the table cell boundaries */
+}
+
+.tooltipped .tooltipUnit {
+    visibility: hidden;
+    width: 120px;
+    background-color: #cf9c69;
+    text-align: center;
+    border: 1px solid black;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltipped:hover .tooltipUnit {
+    visibility: visible;
+}
+
+.tooltipUnit {
+    color: black;
 }

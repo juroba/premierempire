@@ -1,6 +1,6 @@
 import { push } from 'react-router-redux'
 import fetch from 'isomorphic-fetch'
-import { PE_LOGIN, PE_TOKEN, RECEIVE_USER, FULL_RESET } from './HomeConstants'
+import { PE_LOGIN, PE_TOKEN, RECEIVE_USER, FULL_RESET, RECEIVE_MAP_CASES } from './HomeConstants'
 import ApplicationConf from '../../conf/ApplicationConf'
 import { checkAuth, getAuthorization, getJson, removeToken } from '../../utils/ActionUtils'
 
@@ -17,6 +17,25 @@ const HomeAction = {
                 .then(getJson)
                 .then((json) => {
                     dispatch(HomeAction.receiveUser(json))
+                })
+                .catch((err) => {
+                    console.error('Error : ' + err)
+                })
+        }
+    },
+
+    receiveMapCases(mapCases) {
+        return { type: RECEIVE_MAP_CASES, mapCases }
+    },
+
+    getMapCases() {
+        return (dispatch) => {
+            return fetch(ApplicationConf.map.getMapCases(), {
+                method: 'GET',
+            })
+                .then(getJson)
+                .then((json) => {
+                    dispatch(HomeAction.receiveMapCases(json.cases))
                 })
                 .catch((err) => {
                     console.error('Error : ' + err)

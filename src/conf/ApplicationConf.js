@@ -13,7 +13,11 @@ export default {
     view: {
         visibleUnits: (unitId) => `${path}units/visible/${unitId}`,
     },
-    movement: {
-        move: (unitId, direction) => `${path}move/${unitId}/${direction}`,
+    actions: {
+        move: (unitId, direction) => `${path}actions/move/${unitId}/${direction}`,
+        fire: (unitId, targetId) => `${path}actions/fire/${unitId}/${targetId}`,
+    },
+    map: {
+        getMapCases: () => `${path}map/cases`,
     },
 }
